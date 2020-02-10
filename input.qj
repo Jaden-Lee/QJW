@@ -1,0 +1,4 @@
+c:input
+m
+pln(   "Hello, World!")
+pln(2*10+20+20+10)
