@@ -187,7 +187,7 @@ public class interpreter {
 
     private static void checkMain(String str) throws Exception {
         str = str.replaceAll("\\s+","");
-        if (! str.equals("m")) throw specifyException("No class specifier.");
+        if (! str.equals("m{}")) throw specifyException("No class specifier.");
         line++;
     }
 
