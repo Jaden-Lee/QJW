@@ -94,6 +94,72 @@ public class interpreter {
                 }
             }
         }
+        else if (cmd.equals(p)){
+            if (in.indexOf("\"") != -1) {
+                in = in.substring(in.indexOf("\"")+1);
+                if (in.indexOf("\"") == -1) {
+                    throw specifyException("Missing a matching quotation mark, \".");
+                }
+                in = in.substring(0,in.indexOf("\""));
+                System.out.print(in);
+            }
+            else {
+                String operator = locateOperator(in);
+                if (operator.equals("z")) System.out.print(in);
+                else {
+                    in = in.replaceAll("\\s+","");
+                    in = in.substring(1,in.length()-1);
+                    int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                    String after = in.substring(in.indexOf(operator)+1,in.length());
+                    in = in.substring(in.indexOf(operator)+1,in.length());
+                    while (! operator.equals("z")) {
+                        if (operator.equals("+")) {
+                            String temp = after;
+                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
+                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
+                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
+                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
+                            value += Integer.parseInt(temp);
+                        }
+                        else if (operator.equals("-")) {
+                            String temp = after;
+                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
+                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
+                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
+                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
+                            value -= Integer.parseInt(temp);
+                        }
+                        else if (operator.equals("*")) {
+                            String temp = after;
+                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
+                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
+                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
+                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
+                            value *= Integer.parseInt(temp);
+                        }
+                        else if (operator.equals("/")) {
+                            String temp = after;
+                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
+                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
+                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
+                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
+                            value /= Integer.parseInt(temp);
+                        }
+                        operator = locateOperator(in);
+                        in = in.substring(in.indexOf(operator)+1,in.length());
+                        if (in.indexOf(operator) == -1) {
+                            if (operator.equals("+")) value += Integer.parseInt(in);
+                            else if (operator.equals("-")) value -= Integer.parseInt(in);
+                            else if (operator.equals("*")) value *= Integer.parseInt(in);
+                            else if (operator.equals("/")) value /= Integer.parseInt(in);
+                            break;
+                        }
+                        after = in.substring(0,in.indexOf(operator));
+                    }
+                    System.out.print(value);
+                }
+            }
+        }
     }
 
     private static String locateOperator(String input) {
