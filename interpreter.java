@@ -94,7 +94,7 @@ public class interpreter {
                 }
             }
         }
-        else if (cmd.equals(p)){
+        else if (cmd.equals("p")){
             if (in.indexOf("\"") != -1) {
                 in = in.substring(in.indexOf("\"")+1);
                 if (in.indexOf("\"") == -1) {
