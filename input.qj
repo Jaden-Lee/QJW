@@ -1,5 +1,5 @@
 c:input
-m
+m{}
 pln(   "Hello, World!")
 pln(2*10+20+20+10)
 p(2*10)
