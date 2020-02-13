@@ -584,6 +584,12 @@ public class interpreter {
                 curIndex = startIndex;
                 cont = false;
             }
+            else if (cmd.equals("\m")) {
+                throw specifyException("EOF Reached.");
+            }
+            else {
+                throw specifyException("QJW does not support the function, " + cmd  + "()");
+            }
         }
     }
 
