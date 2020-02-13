@@ -4,17 +4,26 @@ import java.util.Scanner;
 
 public class interpreter {
     private static Scanner readInput;
-    private static ArrayList<String> doc;
+    private static ArrayList<String> loop;
     private static String className = "input";
     private static final String INIT = "c:".concat(className);
     private static int line;
+    private static boolean isLoop;
+    private static int startIndex;
+    private static int endIndex;
+    private static int curIndex;
+    private static int interval;
+    private static boolean greaterThan; //greaterThan if true; lessThan if false
+    private static String repeat;
+    private static boolean cont;
     
     public static void main(String[] args) throws Exception {
+        isLoop = false;
         initialize();
     }
     private static void initialize() throws Exception {
         line = 1;
-        doc = new ArrayList();
+        loop = new ArrayList();
         readInput = new Scanner(new File("input.qj"));
         checkClass(readInput.nextLine());
         checkMain(readInput.nextLine());
@@ -25,139 +34,555 @@ public class interpreter {
 
     private static void interpretLine(String str) throws Exception {
         // str = str.replaceAll("\\s+","");
-        if (str.indexOf("(") == -1 || str.indexOf(")") == -1) throw specifyException("Missing one or two parenthesis, ( and/or ).");
-        String cmd = str.substring(0,str.indexOf("(")).replaceAll("\\s+","");
-        String in = str.substring(str.indexOf("("),str.indexOf(")")+1);
-        if (cmd.equals("pln")) {
-            if (in.indexOf("\"") != -1) {
-                in = in.substring(in.indexOf("\"")+1);
-                if (in.indexOf("\"") == -1) {
-                    throw specifyException("Missing a matching quotation mark, \".");
-                }
-                in = in.substring(0,in.indexOf("\""));
-                System.out.println(in);
-            }
-            else {
-                String operator = locateOperator(in);
-                if (operator.equals("z")) System.out.println(in);
-                else {
-                    in = in.replaceAll("\\s+","");
-                    in = in.substring(1,in.length()-1);
-                    int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
-                    String after = in.substring(in.indexOf(operator)+1,in.length());
-                    in = in.substring(in.indexOf(operator)+1,in.length());
-                    while (! operator.equals("z")) {
-                        if (operator.equals("+")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value += Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("-")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value -= Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("*")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value *= Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("/")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value /= Integer.parseInt(temp);
-                        }
-                        operator = locateOperator(in);
-                        in = in.substring(in.indexOf(operator)+1,in.length());
-                        if (in.indexOf(operator) == -1) {
-                            if (operator.equals("+")) value += Integer.parseInt(in);
-                            else if (operator.equals("-")) value -= Integer.parseInt(in);
-                            else if (operator.equals("*")) value *= Integer.parseInt(in);
-                            else if (operator.equals("/")) value /= Integer.parseInt(in);
-                            break;
-                        }
-                        after = in.substring(0,in.indexOf(operator));
+        String cmd = "";
+        String in = "";
+        if (str.indexOf("(") == -1 || str.indexOf(")") == -1) {
+            if (!isLoop) throw specifyException("Missing one or two parenthesis, ( and/or ).");
+        }
+        else {
+            cmd = str.substring(0,str.indexOf("(")).replaceAll("\\s+","");
+            in = str.substring(str.indexOf("("),str.indexOf(")")+1);
+        }
+        if (isLoop) {
+            if (! cont) {
+                str = str.replaceAll("\\s+","");
+                if (str.equals("\\for")) {
+                    cont = true;
+                    while (repeat.indexOf("|") != -1) {
+                        loop.add(repeat.substring(0,repeat.indexOf("|")));
+                        repeat = repeat.substring(repeat.indexOf("|")+1);
                     }
-                    System.out.println(value);
+                    if (greaterThan) {
+                        while (curIndex > endIndex) {
+                            for (String string : loop) {
+                                cmd = string.substring(0,string.indexOf("(")).replaceAll("\\s+","");
+                                in = string.substring(string.indexOf("(")+1,string.indexOf(")"));
+                                in = in.replaceAll("a",Integer.toString(curIndex));
+                                if (cmd.equals("pln")) {
+                                    if (in.indexOf("\"") != -1) {
+                                        in = in.substring(in.indexOf("\"")+1);
+                                        if (in.indexOf("\"") == -1) {
+                                            throw specifyException("Missing a matching quotation mark, \".");
+                                        }
+                                        in = in.substring(0,in.indexOf("\""));
+                                        System.out.println(in);
+                                    }
+                                    else {
+                                        String operator = locateOperator(in);
+                                        if (operator.equals("z")) System.out.println(in);
+                                        else {
+                                            in = in.replaceAll("\\s+","");
+                                            in = in.substring(1,in.length()-1);
+                                            int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                                            in = in.substring(in.indexOf(operator)+1,in.length());
+                                            String after = in.substring(in.indexOf(operator)+1,in.length());
+                                            while (! operator.equals("z")) {
+                                                if (operator.equals("+")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value += Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("-")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value -= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("*")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value *= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("/")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value /= Integer.parseInt(temp);
+                                                }
+                                                operator = locateOperator(in);
+                                                in = in.substring(in.indexOf(operator)+1,in.length());
+                                                if (in.indexOf(operator) == -1) {
+                                                    if (locateOperator(in).equals("z")) {
+                                                        if (operator.equals("+")) value += Integer.parseInt(in);
+                                                        else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                                        else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                                        else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                                        break;
+                                                    }
+                                                }
+                                                after = in;
+                                            }
+                                            System.out.println(value);
+                                        }
+                                    }
+                                }
+                                else if (cmd.equals("p")){
+                                    if (in.indexOf("\"") != -1) {
+                                        in = in.substring(in.indexOf("\"")+1);
+                                        if (in.indexOf("\"") == -1) {
+                                            throw specifyException("Missing a matching quotation mark, \".");
+                                        }
+                                        in = in.substring(0,in.indexOf("\""));
+                                        System.out.print(in);
+                                    }
+                                    else {
+                                        String operator = locateOperator(in);
+                                        if (operator.equals("z")) System.out.print(in);
+                                        else {
+                                            in = in.replaceAll("\\s+","");
+                                            in = in.substring(1,in.length()-1);
+                                            int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                                            in = in.substring(in.indexOf(operator)+1,in.length());
+                                            String after = in.substring(in.indexOf(operator)+1,in.length());
+                                            while (! operator.equals("z")) {
+                                                if (operator.equals("+")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value += Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("-")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value -= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("*")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value *= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("/")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value /= Integer.parseInt(temp);
+                                                }
+                                                operator = locateOperator(in);
+                                                in = in.substring(in.indexOf(operator)+1,in.length());
+                                                if (in.indexOf(operator) == -1) {
+                                                    if (locateOperator(in).equals("z")) {
+                                                        if (operator.equals("+")) value += Integer.parseInt(in);
+                                                        else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                                        else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                                        else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                                        break;
+                                                    }
+                                                }
+                                                after = in;
+                                            }
+                                            System.out.print(value);
+                                        }
+                                    }
+                                }
+                                else if (cmd.equals("ln")) {
+                                    System.out.println();
+                                }
+                            }
+                            curIndex += interval;
+                        }
+                    }
+                    else {
+                        while (curIndex < endIndex) {
+                            for (String string : loop) {
+                                cmd = string.substring(0,string.indexOf("(")).replaceAll("\\s+","");
+                                in = string.substring(string.indexOf("(")+1,string.indexOf(")"));
+                                in = in.replaceAll("a",Integer.toString(curIndex));
+                                if (cmd.equals("pln")) {
+                                    if (in.indexOf("\"") != -1) {
+                                        in = in.substring(in.indexOf("\"")+1);
+                                        if (in.indexOf("\"") == -1) {
+                                            throw specifyException("Missing a matching quotation mark, \".");
+                                        }
+                                        in = in.substring(0,in.indexOf("\""));
+                                        System.out.println(in);
+                                    }
+                                    else {
+                                        String operator = locateOperator(in);
+                                        if (operator.equals("z")) System.out.println(in);
+                                        else {
+                                            in = in.replaceAll("\\s+","");
+                                            in = in.substring(1,in.length()-1);
+                                            int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                                            in = in.substring(in.indexOf(operator)+1,in.length());
+                                            String after = in.substring(in.indexOf(operator)+1,in.length());
+                                            while (! operator.equals("z")) {
+                                                if (operator.equals("+")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value += Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("-")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value -= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("*")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value *= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("/")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value /= Integer.parseInt(temp);
+                                                }
+                                                operator = locateOperator(in);
+                                                in = in.substring(in.indexOf(operator)+1,in.length());
+                                                if (in.indexOf(operator) == -1) {
+                                                    if (locateOperator(in).equals("z")) {
+                                                        if (operator.equals("+")) value += Integer.parseInt(in);
+                                                        else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                                        else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                                        else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                                        break;
+                                                    }
+                                                }
+                                                after = in;
+                                            }
+                                            System.out.println(value);
+                                        }
+                                    }
+                                }
+                                else if (cmd.equals("p")){
+                                    if (in.indexOf("\"") != -1) {
+                                        in = in.substring(in.indexOf("\"")+1);
+                                        if (in.indexOf("\"") == -1) {
+                                            throw specifyException("Missing a matching quotation mark, \".");
+                                        }
+                                        in = in.substring(0,in.indexOf("\""));
+                                        System.out.print(in);
+                                    }
+                                    else {
+                                        String operator = locateOperator(in);
+                                        if (operator.equals("z")) System.out.print(in);
+                                        else {
+                                            in = in.replaceAll("\\s+","");
+                                            in = in.substring(1,in.length()-1);
+                                            int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                                            in = in.substring(in.indexOf(operator)+1,in.length());
+                                            String after = in.substring(in.indexOf(operator)+1,in.length());
+                                            while (! operator.equals("z")) {
+                                                if (operator.equals("+")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value += Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("-")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value -= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("*")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value *= Integer.parseInt(temp);
+                                                }
+                                                else if (operator.equals("/")) {
+                                                    int min = Integer.MAX_VALUE;
+                                                    String temp = after;
+                                                    if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                                    value /= Integer.parseInt(temp);
+                                                }
+                                                operator = locateOperator(in);
+                                                in = in.substring(in.indexOf(operator)+1,in.length());
+                                                if (in.indexOf(operator) == -1) {
+                                                    if (locateOperator(in).equals("z")) {
+                                                        if (operator.equals("+")) value += Integer.parseInt(in);
+                                                        else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                                        else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                                        else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                                        break;
+                                                    }
+                                                }
+                                                after = in;
+                                            }
+                                            System.out.print(value);
+                                        }
+                                    }
+                                }
+                                else if (cmd.equals("ln")) {
+                                    System.out.println();
+                                }
+                            }
+                            curIndex += interval;
+                        }
+                    }
                 }
+                else {
+                    repeat += (str + "|");
+                }
+                repeat = repeat.replaceAll("null", "");
             }
         }
-        else if (cmd.equals("p")){
-            if (in.indexOf("\"") != -1) {
-                in = in.substring(in.indexOf("\"")+1);
-                if (in.indexOf("\"") == -1) {
-                    throw specifyException("Missing a matching quotation mark, \".");
-                }
-                in = in.substring(0,in.indexOf("\""));
-                System.out.print(in);
-            }
-            else {
-                String operator = locateOperator(in);
-                if (operator.equals("z")) System.out.print(in);
-                else {
-                    in = in.replaceAll("\\s+","");
-                    in = in.substring(1,in.length()-1);
-                    int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
-                    String after = in.substring(in.indexOf(operator)+1,in.length());
-                    in = in.substring(in.indexOf(operator)+1,in.length());
-                    while (! operator.equals("z")) {
-                        if (operator.equals("+")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value += Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("-")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value -= Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("*")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value *= Integer.parseInt(temp);
-                        }
-                        else if (operator.equals("/")) {
-                            String temp = after;
-                            if (after.indexOf("+") != -1) temp = after.substring(0, after.indexOf("+"));
-                            if (after.indexOf("-") != -1) temp = after.substring(0, after.indexOf("-"));
-                            if (after.indexOf("*") != -1) temp = after.substring(0, after.indexOf("*"));
-                            if (after.indexOf("/") != -1) temp = after.substring(0, after.indexOf("/"));
-                            value /= Integer.parseInt(temp);
-                        }
-                        operator = locateOperator(in);
-                        in = in.substring(in.indexOf(operator)+1,in.length());
-                        if (in.indexOf(operator) == -1) {
-                            if (operator.equals("+")) value += Integer.parseInt(in);
-                            else if (operator.equals("-")) value -= Integer.parseInt(in);
-                            else if (operator.equals("*")) value *= Integer.parseInt(in);
-                            else if (operator.equals("/")) value /= Integer.parseInt(in);
-                            break;
-                        }
-                        after = in.substring(0,in.indexOf(operator));
+        else {
+            if (cmd.equals("pln")) {
+                if (in.indexOf("\"") != -1) {
+                    in = in.substring(in.indexOf("\"")+1);
+                    if (in.indexOf("\"") == -1) {
+                        throw specifyException("Missing a matching quotation mark, \".");
                     }
-                    System.out.print(value);
+                    in = in.substring(0,in.indexOf("\""));
+                    System.out.println(in);
                 }
+                else {
+                    String operator = locateOperator(in);
+                    if (operator.equals("z")) System.out.println(in);
+                    else {
+                        in = in.replaceAll("\\s+","");
+                        in = in.substring(1,in.length()-1);
+                        int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                        in = in.substring(in.indexOf(operator)+1,in.length());
+                        String after = in.substring(in.indexOf(operator)+1,in.length());
+                        while (! operator.equals("z")) {
+                            if (operator.equals("+")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value += Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("-")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value -= Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("*")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value *= Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("/")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value /= Integer.parseInt(temp);
+                            }
+                            operator = locateOperator(in);
+                            in = in.substring(in.indexOf(operator)+1,in.length());
+                            if (in.indexOf(operator) == -1) {
+                                if (locateOperator(in).equals("z")) {
+                                    if (operator.equals("+")) value += Integer.parseInt(in);
+                                    else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                    else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                    else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                    break;
+                                }
+                            }
+                            after = in;
+                        }
+                        System.out.println(value);
+                    }
+                }
+            }
+            else if (cmd.equals("p")){
+                if (in.indexOf("\"") != -1) {
+                    in = in.substring(in.indexOf("\"")+1);
+                    if (in.indexOf("\"") == -1) {
+                        throw specifyException("Missing a matching quotation mark, \".");
+                    }
+                    in = in.substring(0,in.indexOf("\""));
+                    System.out.print(in);
+                }
+                else {
+                    String operator = locateOperator(in);
+                    if (operator.equals("z")) System.out.println(in);
+                    else {
+                        in = in.replaceAll("\\s+","");
+                        in = in.substring(1,in.length()-1);
+                        int value = Integer.parseInt(in.substring(0,in.indexOf(operator)));
+                        in = in.substring(in.indexOf(operator)+1,in.length());
+                        String after = in.substring(in.indexOf(operator)+1,in.length());
+                        while (! operator.equals("z")) {
+                            if (operator.equals("+")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value += Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("-")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value -= Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("*")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value *= Integer.parseInt(temp);
+                            }
+                            else if (operator.equals("/")) {
+                                int min = Integer.MAX_VALUE;
+                                String temp = after;
+                                if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
+                                value /= Integer.parseInt(temp);
+                            }
+                            operator = locateOperator(in);
+                            in = in.substring(in.indexOf(operator)+1,in.length());
+                            if (in.indexOf(operator) == -1) {
+                                if (locateOperator(in).equals("z")) {
+                                    if (operator.equals("+")) value += Integer.parseInt(in);
+                                    else if (operator.equals("-")) value -= Integer.parseInt(in);
+                                    else if (operator.equals("*")) value *= Integer.parseInt(in);
+                                    else if (operator.equals("/")) value /= Integer.parseInt(in);
+                                    break;
+                                }
+                            }
+                            after = in;
+                        }
+                        System.out.print(value);
+                    }
+                }
+            }
+            else if (cmd.equals("ln")) {
+                System.out.println();
+            }
+            else if (cmd.equals("for")) {
+                isLoop = true;
+                String start = in.substring(0,in.indexOf(";"));
+                in = in.substring(in.indexOf(";")+1);
+                String middle = in.substring(0,in.indexOf(";"));
+                in = in.substring(in.indexOf(";")+1);
+                String end = in;
+                startIndex = Integer.parseInt(start.substring(start.indexOf("a=")+2));
+                
+                if (middle.indexOf("<") != -1) {
+                    endIndex = Integer.parseInt(middle.substring(middle.indexOf("<")+1));
+                    greaterThan = false;
+                }
+                else if (middle.indexOf(">") != -1) {
+                    endIndex = Integer.parseInt(middle.substring(middle.indexOf(">")+1));
+                    greaterThan = true;
+                }
+                else {
+                    if (middle.indexOf("=") != -1) {
+                        throw specifyException("The equal sign operator is not supported. Please use > or <");
+                    }
+                    throw specifyException("No boolean expression detected. Use > or <");
+                }
+    
+                if (end.indexOf("++") != -1) {
+                    interval = 1;
+                }
+                else if (end.indexOf("--") != -1) {
+                    interval = -1;
+                }
+                else if (end.indexOf("+=") != -1) {
+                    interval = Integer.parseInt(end.substring(end.indexOf("+=")+2));
+                }
+                else if (end.indexOf("-=") != -1) {
+                    interval = -1*Integer.parseInt(end.substring(end.indexOf("-=")+2));
+                }
+                curIndex = startIndex;
+                cont = false;
             }
         }
     }

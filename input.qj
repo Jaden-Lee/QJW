@@ -1,5 +1,16 @@
 c:input
-m{}
-pln(   "Hello, World!")
-pln(2*10+20+20+10)
-p(2*10)
+    m{}
+        pln(   "Hello, World!")
+        pln(2*10+20+20+10)
+        p(2*10)
+        p(2*10)
+        ln()
+        pln(    "does this work"   )
+        pln(20/10*100-150)
+        p(20/10*100-150)
+        pln(20/10*100-100)
+        for(a=0;a<10;a++)
+            p("k")
+            pln("hi")
+            p(a)
+        \for
