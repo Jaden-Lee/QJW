@@ -18,3 +18,6 @@ Quick Java Write is a programming language extending Java and allowing users a q
 The QJW intepreter requires [JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) to run.
 
 Download the [interpreter.java](https://github.com/Jaden-Lee/QJW/blob/master/interpreter.java) file and put it in a folder with your .qj extension files
+
+# Work In Progress Features
+  - Variables (Will use HashSet)
