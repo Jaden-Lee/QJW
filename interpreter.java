@@ -46,7 +46,7 @@ public class interpreter {
         if (isLoop) {
             if (! cont) {
                 str = str.replaceAll("\\s+","");
-                if (str.equals("\\for")) {
+                if (str.equals("\\f")) {
                     cont = true;
                     while (repeat.indexOf("|") != -1) {
                         loop.add(repeat.substring(0,repeat.indexOf("|")));
@@ -545,7 +545,7 @@ public class interpreter {
             else if (cmd.equals("ln")) {
                 System.out.println();
             }
-            else if (cmd.equals("for")) {
+            else if (cmd.equals("f")) {
                 isLoop = true;
                 String start = in.substring(0,in.indexOf(";"));
                 in = in.substring(in.indexOf(";")+1);
