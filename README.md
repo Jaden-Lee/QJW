@@ -11,6 +11,7 @@ Quick Java Write is a programming language extending Java and allowing users a q
   - System.out.println(); → pln()
   - System.out.print(); → p()
   - for (int a = START; i < END; i += INTERVAL) {} → f(a=START;a<END;a+=VAR)
+    - No brackets used for for loops. Instead use \f to end the for loop.
 
 ### Installation
 
