@@ -14,3 +14,4 @@ c:input
             pln("hi")
             p(a)
         \f
+    \m()

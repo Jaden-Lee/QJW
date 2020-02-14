@@ -584,7 +584,7 @@ public class interpreter {
                 curIndex = startIndex;
                 cont = false;
             }
-            else if (cmd.equals("\\m")) {
+            else if (cmd.equals("m")) {
                 throw specifyException("EOF Reached.");
             }
             else {
