@@ -26,4 +26,5 @@ The QJW intepreter requires [JDK](https://www.oracle.com/technetwork/java/javase
 Download the [interpreter.java](https://github.com/Jaden-Lee/QJW/blob/master/interpreter.java) file and put it in a folder with your .qj extension files
 
 ### Work In Progress Features
-  - Nothing right now...
+  - Nothing right now.
+  - Contact [me] (mailto:jadenlee77@gmail.com) to request any features to be added.
