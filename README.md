@@ -28,3 +28,6 @@ Download the [interpreter.java](https://github.com/Jaden-Lee/QJW/blob/master/int
 ### Work In Progress Features
   - Nothing right now.
   - Contact [me](mailto:jadenlee77@gmail.com) to request any features to be added.
+
+### Example .QJ File
+  - Download the [input.qj](https://github.com/Jaden-Lee/QJW/blob/master/input.qj) file and use it as an example.
