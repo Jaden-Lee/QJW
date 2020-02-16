@@ -1,5 +1,6 @@
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class interpreter {
@@ -16,6 +17,8 @@ public class interpreter {
     private static boolean greaterThan; //greaterThan if true; lessThan if false
     private static String repeat;
     private static boolean cont;
+    private static HashMap<String, Integer> intVariables;
+    private static HashMap<String, String> stringVariables;
     
     public static void main(String[] args) throws Exception {
         isLoop = false;
@@ -24,6 +27,8 @@ public class interpreter {
     private static void initialize() throws Exception {
         line = 1;
         loop = new ArrayList();
+        intVariables = new HashMap<>();
+        stringVariables = new HashMap<>();
         readInput = new Scanner(new File("input.qj"));
         checkClass(readInput.nextLine());
         checkMain(readInput.nextLine());
@@ -33,6 +38,29 @@ public class interpreter {
     }
 
     private static void interpretLine(String str) throws Exception {
+        // str = str.replaceAll("\\s+","");
+        if (str.indexOf("(") != -1 && str.indexOf(")") != -1) {
+            hasParenthesis(str);
+        }
+        else if (str.indexOf("int") != -1 || str.toLowerCase().indexOf("string") != -1) {
+            str = str.replaceAll("\\s+","");
+            if (str.indexOf("int") != -1) {
+                String name = str.substring(str.indexOf("int")+3, str.indexOf("="));
+                String assignment = str.substring(str.indexOf("=")+1);
+                intVariables.put(name, Integer.parseInt(assignment));
+            } 
+            else if (str.toLowerCase().indexOf("string") != -1) {
+                String name = str.substring(str.toLowerCase().indexOf("string")+6, str.indexOf("="));
+                String assignment = str.substring(str.indexOf("\"")+1,str.indexOf("\"")+1+str.substring(str.indexOf("\"")+1).indexOf("\""));
+                stringVariables.put(name, assignment);
+            }
+        }
+        else {
+            throw specifyException("QJW does not understand the method, " + str);
+        }
+    }
+
+    private static void hasParenthesis(String str) throws Exception {
         // str = str.replaceAll("\\s+","");
         String cmd = "";
         String in = "";
@@ -46,7 +74,7 @@ public class interpreter {
         if (isLoop) {
             if (! cont) {
                 str = str.replaceAll("\\s+","");
-                if (str.equals("\\f")) {
+                if (cmd.equals("\\f")) {
                     cont = true;
                     while (repeat.indexOf("|") != -1) {
                         loop.add(repeat.substring(0,repeat.indexOf("|")));
@@ -81,9 +109,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value += Integer.parseInt(temp);
                                                 }
@@ -91,9 +119,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value -= Integer.parseInt(temp);
                                                 }
@@ -101,9 +129,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value *= Integer.parseInt(temp);
                                                 }
@@ -111,9 +139,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value /= Integer.parseInt(temp);
                                                 }
@@ -157,9 +185,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value += Integer.parseInt(temp);
                                                 }
@@ -167,9 +195,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value -= Integer.parseInt(temp);
                                                 }
@@ -177,9 +205,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value *= Integer.parseInt(temp);
                                                 }
@@ -187,9 +215,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value /= Integer.parseInt(temp);
                                                 }
@@ -216,6 +244,7 @@ public class interpreter {
                             }
                             curIndex += interval;
                         }
+                        isLoop = false;
                     }
                     else {
                         while (curIndex < endIndex) {
@@ -246,9 +275,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value += Integer.parseInt(temp);
                                                 }
@@ -256,9 +285,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value -= Integer.parseInt(temp);
                                                 }
@@ -266,9 +295,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value *= Integer.parseInt(temp);
                                                 }
@@ -276,9 +305,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value /= Integer.parseInt(temp);
                                                 }
@@ -322,9 +351,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value += Integer.parseInt(temp);
                                                 }
@@ -332,9 +361,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value -= Integer.parseInt(temp);
                                                 }
@@ -342,9 +371,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value *= Integer.parseInt(temp);
                                                 }
@@ -352,9 +381,9 @@ public class interpreter {
                                                     int min = Integer.MAX_VALUE;
                                                     String temp = after;
                                                     if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                                    if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                                    if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                                    if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                                     if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                                     value /= Integer.parseInt(temp);
                                                 }
@@ -381,6 +410,7 @@ public class interpreter {
                             }
                             curIndex += interval;
                         }
+                        isLoop = false;
                     }
                 }
                 else {
@@ -401,7 +431,17 @@ public class interpreter {
                 }
                 else {
                     String operator = locateOperator(in);
-                    if (operator.equals("z")) System.out.println(in);
+                    if (operator.equals("z")) {
+                        int intRet = intVariables.getOrDefault(in.substring(in.indexOf("(")+1,in.indexOf(")")),-1);
+                        String strRet = stringVariables.getOrDefault(in.substring(in.indexOf("(")+1,in.indexOf(")")),"z");
+                        if (intRet != -1) {
+                            System.out.println(intRet);
+                        }
+                        else if (! strRet.equals("z")) {
+                            System.out.println(strRet);
+                        }
+                        else System.out.println(in);
+                    }
                     else {
                         in = in.replaceAll("\\s+","");
                         in = in.substring(1,in.length()-1);
@@ -413,9 +453,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value += Integer.parseInt(temp);
                             }
@@ -423,9 +463,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value -= Integer.parseInt(temp);
                             }
@@ -433,9 +473,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value *= Integer.parseInt(temp);
                             }
@@ -443,9 +483,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value /= Integer.parseInt(temp);
                             }
@@ -477,7 +517,17 @@ public class interpreter {
                 }
                 else {
                     String operator = locateOperator(in);
-                    if (operator.equals("z")) System.out.println(in);
+                    if (operator.equals("z")) {
+                        int intRet = intVariables.getOrDefault(in.substring(in.indexOf("(")+1,in.indexOf(")")),-1);
+                        String strRet = stringVariables.getOrDefault(in.substring(in.indexOf("(")+1,in.indexOf(")")),"z");
+                        if (intRet != -1) {
+                            System.out.print(intRet);
+                        }
+                        else if (! strRet.equals("z")) {
+                            System.out.print(strRet);
+                        }
+                        else System.out.print(in);
+                    }
                     else {
                         in = in.replaceAll("\\s+","");
                         in = in.substring(1,in.length()-1);
@@ -489,9 +539,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value += Integer.parseInt(temp);
                             }
@@ -499,9 +549,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value -= Integer.parseInt(temp);
                             }
@@ -509,9 +559,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value *= Integer.parseInt(temp);
                             }
@@ -519,9 +569,9 @@ public class interpreter {
                                 int min = Integer.MAX_VALUE;
                                 String temp = after;
                                 if (after.indexOf("+") != -1) min = Math.min(min, after.indexOf("+"));
-                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));;
-                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));;
-                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));;
+                                if (after.indexOf("-") != -1) min = Math.min(min, after.indexOf("-"));
+                                if (after.indexOf("*") != -1) min = Math.min(min, after.indexOf("*"));
+                                if (after.indexOf("/") != -1) min = Math.min(min, after.indexOf("/"));
                                 if (min != Integer.MAX_VALUE) temp = after.substring(0, min);
                                 value /= Integer.parseInt(temp);
                             }

@@ -13,5 +13,9 @@ c:input
             p("k")
             pln("hi")
             p(a)
-        \f
-    \m()
+        \f()
+        int b = 10
+        String c = "Hello!!"
+        ln()
+        pln(b)
+        p(c)
