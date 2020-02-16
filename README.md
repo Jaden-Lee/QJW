@@ -12,7 +12,13 @@ Quick Java Write is a programming language extending Java and allowing users a q
   - System.out.print(); → p()
   - for (int a = START; i < END; i += INTERVAL) {} → f (a = START; a < END; a += INTERVAL)
     - No brackets used for for loops. Instead use \f to end the for loop.
-
+  - variables added
+    - int variableName = integer
+    - String variableName = "String"
+    - string variableName = "string"
+  - print a variable
+    - p(variableName)
+    - pln(variableName)
 ### Installation
 
 The QJW intepreter requires [JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) to run.
@@ -20,4 +26,4 @@ The QJW intepreter requires [JDK](https://www.oracle.com/technetwork/java/javase
 Download the [interpreter.java](https://github.com/Jaden-Lee/QJW/blob/master/interpreter.java) file and put it in a folder with your .qj extension files
 
 ### Work In Progress Features
-  - Variables (Will use HashSet)
+  - Nothing right now...
