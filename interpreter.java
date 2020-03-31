@@ -56,8 +56,10 @@ public class interpreter {
             }
         }
         else {
+            str = str.replaceAll("\\s+","");
             throw specifyException("QJW does not understand the method, " + str);
         }
+        line++;
     }
 
     private static void hasParenthesis(String str) throws Exception {

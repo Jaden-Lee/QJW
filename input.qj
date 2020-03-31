@@ -19,3 +19,7 @@ c:input
         ln()
         pln(b)
         p(c)
+        ln()
+        pln("b")
+        int b = 9
+        pln(b)
